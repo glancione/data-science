@@ -1,0 +1,6 @@
+# This file includes dependencies required to run the code
+numpy
+pandas
+matplotlib
+seaborn
+bokeh
