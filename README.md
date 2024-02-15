@@ -1,15 +1,5 @@
-folder structure 
-
-
-DATA SCIENCE
-  	DATA PREPARATION
-    		DIMENSIONALITY REDUCTION
-    		BASICS
-    DATA VISUALIZATION
-       BASICS
-  	TEXT MINING
-  	MACHINE LEARNING
-    		REGRESSION
-    		CLASSIFICATION
-    		IMAGE-RECOGNITION
-    		NLP
+###
+data science related stuff
+...
+todo folder structure description
+###
