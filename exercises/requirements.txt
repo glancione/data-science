@@ -1,6 +1,7 @@
 # This file includes dependencies required to run the code
 
-plotly
 numpy
 pandas
+plotly
 matplotlib
+sklearn
