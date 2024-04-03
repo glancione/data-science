@@ -1,0 +1,7 @@
+# This file includes dependencies required to run the code
+
+pandas
+numpy
+matplotlib
+seaborn
+sklearn
