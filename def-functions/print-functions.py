@@ -5,6 +5,7 @@
 from sklearn.metrics import precision_recall_fscore_support as score
 from sklearn.metrics import accuracy_score, f1_score, classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
+import numpy as np
 
 
 def print_title(text):
@@ -63,3 +64,22 @@ def train_test_split_verbose(X, y, test_size=None, train_size=None, random_state
         print('Train set number of row(s): \n {}'.format(X_train.shape[0]))
         print('Test set number of row(s): \n {}'.format(X_test.shape[0]))
     return X_train, X_test, y_train, y_test
+
+
+
+def do_probs_and_print_guesses_k(clf, df, k=3, print_acc=False):
+    guesses = clf.predict_proba(df)  # move outside the function if you have to run it multiple times
+    probabilities = [sorted(probas, reverse=True)[:k] for probas in guesses]
+    cum_acc = [np.sum(p) for p in probabilities]
+    if print_acc:
+        print(f"Accuracy with top {k} results is: {np.mean(cum_acc)}")
+    return guesses, probabilities, cum_acc
+
+
+def print_guesses_k(guesses, k=3, print_acc=False):
+    # it requires the run of guesses = clf.predict_proba(df) before calling the function
+    probabilities = [sorted(probas, reverse=True)[:k] for probas in guesses]
+    cum_acc = [np.sum(p) for p in probabilities]
+    if print_acc:
+        print(f"Accuracy with top {k} results is: {np.mean(cum_acc)}")
+    return probabilities, cum_acc
