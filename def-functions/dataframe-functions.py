@@ -61,3 +61,30 @@ def handle_outliers(df, columns, method='zscore', threshold=3):
 def encode_categorical_features(df, columns):
     return pd.get_dummies(df, columns=columns)
 
+
+def describe_numerical_columns(df, columns):
+    return df[columns].describe()
+
+
+def plot_histogram(df, column, bins=20):
+    plt.hist(df[column], bins=bins)
+    plt.xlabel(column)
+    plt.ylabel('Frequency')
+    plt.title(f'Histogram of {column}')
+    plt.show()
+
+
+
+def plot_boxplot(df, column):
+    sns.boxplot(x=df[column])
+    plt.title(f'Boxplot of {column}')
+    plt.show()
+
+
+
+def plot_correlation_matrix(df, annot=True):
+    corr_matrix = df.corr()
+    sns.heatmap(corr_matrix, annot=annot)
+    plt.title('Correlation Matrix')
+    plt.show()
+
