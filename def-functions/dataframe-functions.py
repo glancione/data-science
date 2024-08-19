@@ -32,3 +32,32 @@ def analyze_column(df, column_name):
 
     return analysis
 
+
+def handle_missing_values(df, strategy='dropna'):
+    if strategy == 'dropna':  # The strategy for handling missing values. Options are 'dropna', 'fill', 'impute'.
+        return df.dropna()
+    elif strategy == 'fill':
+        return df.fillna(0)  # Replace with appropriate fill value
+    elif strategy == 'impute':      # Implement imputation logic
+        pass
+    else:
+        raise ValueError("Invalid strategy for handling missing values.")
+
+
+def handle_outliers(df, columns, method='zscore', threshold=3):
+    if method == 'zscore':
+        for col in columns:
+            z_scores = stats.zscore(df[col])
+            df = df[abs(z_scores) < threshold]
+    elif method == 'iqr':  # Options are 'zscore', 'iqr'.
+        # Implement IQR-based outlier detection
+        pass
+    else:
+        raise ValueError("Invalid method for outlier detection.")
+    return df
+
+
+
+def encode_categorical_features(df, columns):
+    return pd.get_dummies(df, columns=columns)
+
