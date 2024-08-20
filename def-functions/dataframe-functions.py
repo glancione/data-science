@@ -9,6 +9,8 @@ import seaborn as sns
 from scipy import stats
 import nltk
 from nltk.corpus import stopwords
+from sklearn.impute import SimpleImputer
+
 
 def analyze_column(df, column_name):
     column_data = df[column_name]
@@ -34,13 +36,14 @@ def analyze_column(df, column_name):
     return analysis
 
 
-def handle_missing_values(df, strategy='dropna', fillna=None, imputena=None):
-    if strategy == 'dropna':  # The strategy for handling missing values. Options are 'dropna', 'fill', 'impute'.
+def handle_missing_values(df, strategy_='drop', fill_val=0, impute_strategy='most_frequent'):
+    if strategy_ == 'drop':
         return df.dropna()
-    elif strategy == 'fill':
-        return df.fillna(fillna)
-    elif strategy == 'impute':      # Implement imputation logic
-        pass
+    elif strategy_ == 'fill':
+        return df.fillna(fill_val)
+    elif strategy_ == 'impute':
+        imp = SimpleImputer(strategy=impute_strategy)
+        return imp.fit_transform(df)
     else:
         raise ValueError("Invalid strategy for handling missing values.")
 
