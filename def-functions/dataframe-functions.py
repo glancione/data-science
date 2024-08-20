@@ -33,11 +33,11 @@ def analyze_column(df, column_name):
     return analysis
 
 
-def handle_missing_values(df, strategy='dropna'):
+def handle_missing_values(df, strategy='dropna', fillna=None, imputena=None):
     if strategy == 'dropna':  # The strategy for handling missing values. Options are 'dropna', 'fill', 'impute'.
         return df.dropna()
     elif strategy == 'fill':
-        return df.fillna(0)  # Replace with appropriate fill value
+        return df.fillna(fillna)
     elif strategy == 'impute':      # Implement imputation logic
         pass
     else:
