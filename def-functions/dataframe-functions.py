@@ -59,6 +59,7 @@ def impute_missing_values(df, column, strategy='mean'):
 def calculate_correlation(df, column1, column2):
     return df[column1].corr(df[column2])
 
+
 def handle_outliers(df, columns, method='zscore', threshold=3):
     if method == 'zscore':
         for col in columns:
