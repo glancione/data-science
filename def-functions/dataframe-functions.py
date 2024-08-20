@@ -54,7 +54,7 @@ def handle_outliers(df, columns, method='zscore', threshold=3):
             z_scores = stats.zscore(df[col])
             df = df[abs(z_scores) < threshold]
     elif method == 'iqr':  # Options are 'zscore', 'iqr'.
-        # Implement IQR-based outlier detection
+        # TO DO Implement IQR-based outlier detection
         pass
     else:
         raise ValueError("Invalid method for outlier detection.")
@@ -75,6 +75,8 @@ def preprocess_suggestion(column):
     data_type_ = str(column.dtype)
     if data_type_.startswith('int') or data_type_.startswith('float'):
         if column.isnull().sum() > 0:
+            percent_missing = column.isnull().sum() * 100 / len(column)
+            suggestion_ += str(percent_missing) + " % of values are outliers.\n"
             suggestion_ += "Fill missing values with: mean, median, or mode (depending on distribution).\n"
         q1 = column.quantile(0.25)
         q3 = column.quantile(0.75)
@@ -82,6 +84,7 @@ def preprocess_suggestion(column):
         outliers = column[(column < (q1 - 1.5 * iqr)) | (column > (q3 + 1.5 * iqr))]
 
         if len(outliers) > 0:
+            suggestion_ += "Found " + str(len(outliers)) + " outliers.\n"
             suggestion_ += "Consider handling outliers: capping, flooring, or removal.\n"
 
         if (column.skew() > 1) or (column.skew() < -1):
