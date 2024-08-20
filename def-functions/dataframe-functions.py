@@ -7,7 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
-
+import nltk
+from nltk.corpus import stopwords
 
 def analyze_column(df, column_name):
     column_data = df[column_name]
@@ -88,13 +89,22 @@ def preprocess_suggestion(column):
 
     elif data_type_ == 'object':
         if column.isnull().sum() > 0:
-            suggestion_ += "Fill missing values with: mode or 'unknown' category.\n"
+            suggestion_ += "Fill missing values with: mode or 'unknown' category if categorical.\n"
+            suggestion_ += "Fill missing values with: empty string or 'missing' value (if text).\n"
         if len(column.unique()) / len(column) > 0.1:
             suggestion_ += "High cardinality. Consider feature hashing, target encoding, or frequency encoding.\n"
 
         if not pd.api.types.is_datetime64_dtype(column):
             suggestion_ += "Check for consistent formatting in text data.\n"
 
+        if column.str.contains(r'[^a-zA-Z\s]').any():
+            suggestion_ += "Consider removing noise (numbers, special characters).\n"
+        if column.apply(lambda x: len(set(x.split()) & set(stopwords.words('english'))) > 0).any():
+            suggestion_ += "Consider removing stop words.\n"
+        if column.str.len().mean() > 100:
+            suggestion_ += "Text length is relatively long. Consider text summarization or truncation.\n"
+        if column.apply(lambda x: len(set(x.split())) / len(x.split())).mean() < 0.5:
+            suggestion_ += "Text contains repeated words. Consider deduplication or stemming.\n"
 
     elif data_type_ == 'datetime64[ns]':
         if column.isnull().sum() > 0:
