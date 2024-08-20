@@ -45,6 +45,17 @@ def handle_missing_values(df, strategy_='drop', fill_val=0, impute_strategy='mos
         raise ValueError("Invalid strategy for handling missing values.")
 
 
+def impute_missing_values(df, column, strategy='mean'):
+    if strategy == 'mean':
+        return df[column].fillna(df[column].mean(), inplace=True)
+    elif strategy == 'median':
+        return df[column].fillna(df[column].median(), inplace=True)
+    elif strategy == 'mode':
+        return df[column].fillna(df[column].mode()[0], inplace=True)
+    else:
+        raise ValueError("Invalid strategy for imputation.")
+
+
 def handle_outliers(df, columns, method='zscore', threshold=3):
     if method == 'zscore':
         for col in columns:
