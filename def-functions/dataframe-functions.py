@@ -4,10 +4,7 @@
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from scipy import stats
-import nltk
 from nltk.corpus import stopwords
 from sklearn.impute import SimpleImputer
 
@@ -131,4 +128,3 @@ def preprocess_suggestion(column):
         suggestion_ = "Column seems clean, no immediate preprocessing needed."
 
     return suggestion_
-
