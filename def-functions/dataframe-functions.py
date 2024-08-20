@@ -65,3 +65,50 @@ def encode_categorical_features(df, columns):
 def describe_numerical_columns(df, columns):
     return df[columns].describe()
 
+
+def preprocess_suggestion(column):
+    suggestion_ = ""
+    data_type_ = str(column.dtype)
+    if data_type_.startswith('int') or data_type_.startswith('float'):
+        if column.isnull().sum() > 0:
+            suggestion_ += "Fill missing values with: mean, median, or mode (depending on distribution).\n"
+        q1 = column.quantile(0.25)
+        q3 = column.quantile(0.75)
+        iqr = q3 - q1
+        outliers = column[(column < (q1 - 1.5 * iqr)) | (column > (q3 + 1.5 * iqr))]
+
+        if len(outliers) > 0:
+            suggestion_ += "Consider handling outliers: capping, flooring, or removal.\n"
+
+        if (column.skew() > 1) or (column.skew() < -1):
+            suggestion_ += "Distribution is skewed. Consider log or square root transformation.\n"
+
+        if (column.max() - column.min()) > 100:
+            suggestion_ += "Large scale difference. Consider normalization or standardization.\n"
+
+    elif data_type_ == 'object':
+        if column.isnull().sum() > 0:
+            suggestion_ += "Fill missing values with: mode or 'unknown' category.\n"
+        if len(column.unique()) / len(column) > 0.1:
+            suggestion_ += "High cardinality. Consider feature hashing, target encoding, or frequency encoding.\n"
+
+        if not pd.api.types.is_datetime64_dtype(column):
+            suggestion_ += "Check for consistent formatting in text data.\n"
+
+
+    elif data_type_ == 'datetime64[ns]':
+        if column.isnull().sum() > 0:
+            suggestion_ += "Fill missing values with appropriate date or interpolation.\n"
+
+        if not pd.api.types.is_datetime64_dtype(column):
+            suggestion_ += "Check for consistent date format.\n"
+
+        suggestion_ += "Consider extracting features like year, month, day, hour, minute, etc.\n"
+    else:
+        suggestion_ += "Data type not recognized. Please investigate further.\n"
+
+    if not suggestion_:
+        suggestion_ = "Column seems clean, no immediate preprocessing needed."
+
+    return suggestion_
+
