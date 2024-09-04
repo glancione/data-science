@@ -145,7 +145,7 @@ def preprocess_suggestion(column):
     return suggestion_
 
 
-def unroll_vector_column(df, column_name):
+def unroll_vector_column(df, column_name, drop_old_column=False):
     print('-'*20)
     print('Unrolling {} column'.format(column_name))
     numpy_data = np.array(df[column_name])
@@ -155,4 +155,12 @@ def unroll_vector_column(df, column_name):
     print('Column {} correctly unrolled'.format(column_name))
     print('Unrolled vector sample:\n {}'.format(df_out.sample(5)))
     print('-'*20)
+    if drop_old_column:
+        print('Drop Old Column ENABLED')
+        try:
+            df = df.drop(column_name, axis=1)
+            print('{} correctly dropped!'.format(column_name))
+        except Exception as e:
+            print(e)
+        print('-'*20)
     return df
