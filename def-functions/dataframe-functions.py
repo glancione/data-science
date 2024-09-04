@@ -143,3 +143,16 @@ def preprocess_suggestion(column):
         suggestion_ = "Column seems clean, no immediate preprocessing needed."
 
     return suggestion_
+
+
+def unroll_vector_column(df, column_name):
+    print('-'*20)
+    print('Unrolling {} column'.format(column_name))
+    numpy_data = np.array(df[column_name])
+    df_out = pd.DataFrame(data=numpy_data)
+    df_out.columns = [f'vector{i}' for i in range(0,len(df_out.T))] 
+    df= pd.concat([df, df_out], axis = 1)
+    print('Column {} correctly unrolled'.format(column_name))
+    print('Unrolled vector sample:\n {}'.format(df_out.sample(5)))
+    print('-'*20)
+    return df
