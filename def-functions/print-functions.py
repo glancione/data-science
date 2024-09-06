@@ -83,3 +83,17 @@ def print_guesses_k(guesses, k=3, print_acc=False):
     if print_acc:
         print(f"Accuracy with top {k} results is: {np.mean(cum_acc)}")
     return probabilities, cum_acc
+
+
+
+def preds_and_probs(model, data, k=3):
+    # it works for random forest classifier
+    guesses = model.predict_proba(data)
+    probabilities = [sorted(probs, reverse=True)[:k] for probs in guesses]
+    k = k-1
+    predictions = model.classes_[np.argsort(guesses)[:, :k:-1]]
+    y_pred_list = predictions[0].tolist()
+    y_proba_list = probabilities[0]
+    print(f"predictions list {y_pred_list}")
+    print(f"predicted probabilities list {y_proba_list}")
+    return y_pred_list, y_proba_list
