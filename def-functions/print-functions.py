@@ -86,12 +86,13 @@ def print_guesses_k(guesses, k=3, print_acc=False):
 
 
 
-def preds_and_probs(model, data, k=3):
+def preds_and_probs(model, data, top_k=3):
     # it works for random forest classifier
-    guesses = model.predict_proba(data)
-    probabilities = [sorted(probs, reverse=True)[:k] for probs in guesses]
-    k = k-1
-    predictions = model.classes_[np.argsort(guesses)[:, :k:-1]]
+    guesses = model.predict_proba(df_in)
+    probabilities = [sorted(probs, reverse=True)[:top_k] for probs in guesses]
+    probabilities = [np.round(f, 2) for f in probabilities]
+    top_k = top_k + 1
+    predictions = model.classes_[np.argsort(guesses)[:, :-top_k:-1]]
     y_pred_list = predictions[0].tolist()
     y_proba_list = probabilities[0]
     print(f"predictions list {y_pred_list}")
