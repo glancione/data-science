@@ -76,13 +76,20 @@ def do_probs_and_print_guesses_k(clf, df, k=3, print_acc=False):
     return guesses, probabilities, cum_acc
 
 
-def print_guesses_k(guesses, k=3, print_acc=False):
-    # it requires the run of guesses = clf.predict_proba(df) before calling the function
-    probabilities = [sorted(probas, reverse=True)[:k] for probas in guesses]
-    cum_acc = [np.sum(p) for p in probabilities]
-    if print_acc:
-        print(f"Accuracy with top {k} results is: {np.mean(cum_acc)}")
-    return probabilities, cum_acc
+def topK_accuracy(model, X, y, k=3):
+    # model has predict_proba()  attribute (i.e. RandomForestClassifier())
+    guesses = model.predict_proba(X)
+    k = k + 1
+    predictions = model.classes_[np.argsort(guesses)[:, : -k:-1]]
+    coutn = 0
+
+    for j in range(len(ref_array)):
+        elem = int(ref_array.iloc[j])
+        if elem in list(predictions[j]):
+            coutn = coutn + 1
+
+    acc_topk = coutn / len(ref_array)
+    return acc_topk
 
 
 
