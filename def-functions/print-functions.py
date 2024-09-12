@@ -83,12 +83,12 @@ def topK_accuracy(model, X, y, k=3):
     predictions = model.classes_[np.argsort(guesses)[:, : -k:-1]]
     coutn = 0
 
-    for j in range(len(ref_array)):
-        elem = int(ref_array.iloc[j])
+    for j in range(len(y)):
+        elem = int(y.iloc[j])
         if elem in list(predictions[j]):
             coutn = coutn + 1
 
-    acc_topk = coutn / len(ref_array)
+    acc_topk = coutn / len(y)
     return acc_topk
 
 
