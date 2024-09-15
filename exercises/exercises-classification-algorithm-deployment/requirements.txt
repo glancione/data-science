@@ -1,11 +1,6 @@
 # This file includes dependencies required to run the code
 
 Flask
-gunicorn
-itsdangerous
-Jinja2
-MarkupSafe
-Werkzeug
 numpy
 scipy
 scikit-learn
