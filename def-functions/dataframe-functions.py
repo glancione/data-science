@@ -7,6 +7,60 @@ import numpy as np
 from scipy import stats
 from nltk.corpus import stopwords
 from sklearn.impute import SimpleImputer
+import os
+
+
+def subsample_set(n, df):
+    n_subsampling = min(n, df.shape[0])
+    print("Subsampling Data ENABLED!")
+    df = df[0:n_subsampling]
+    return df
+    
+
+def get_train_test_val_sets(train_path, test_path, val_path, n_subsampling=None):
+    print("Loading Train data...")
+    X_train = pd.read_csv(os.path.join(train_path, "X_train.csv"), sep=";")
+    y_train = pd.read_csv(os.path.join(train_path, "y_train.csv"), sep=";")
+
+    if n_subsampling:
+        X_train = subsample_set(n_subsampling, X_train)
+        y_train = subsample_set(n_subsampling, y_train)
+
+    print("Correctly loaded Train data!")
+    print("Train data Sample: \n {}".format(X_train.sample(5)))
+    print("-" * 20)
+
+    print("Loading Test data...")
+    X_test = pd.read_csv(os.path.join(test_path, "X_test.csv"), sep=";")
+    y_test = pd.read_csv(os.path.join(test_path, "y_test.csv"), sep=";")
+
+    if n_subsampling:
+        X_test = subsample_set(n_subsampling, X_test)
+        y_test = subsample_set(n_subsampling, y_test)
+
+    print("Correctly loaded Test data!")
+    print("Test data Sample: \n {}".format(X_test.sample(5)))
+    print("-" * 20)
+
+    print("Loading Val data...")
+    X_val = pd.read_csv(os.path.join(val_path, "X_val.csv"), sep=";")
+    y_val = pd.read_csv(os.path.join(val_path, "y_val.csv"), sep=";")
+
+    if n_subsampling:
+        X_val = subsample_set(n_subsampling, X_val)
+        y_val = subsample_set(n_subsampling, y_val)
+
+    print("Correctly loaded Val data!")
+    print("Val data Sample: \n {}".format(X_val.sample(5)))
+    print("-" * 20)
+
+    print("-" * 20)
+    print("Train set has %s rows", str(X_train.shape[0]))
+    print("Test set has %s rows", str(X_test.shape[0]))
+    print("Validation set has %s rows", str(X_val.shape[0]))
+    print("-" * 20)
+
+    return X_train, y_train, X_test, y_test, X_val, y_val
 
 
 def analyze_column(df, column_name):
