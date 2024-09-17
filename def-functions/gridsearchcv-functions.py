@@ -3,18 +3,25 @@
 ########################################
 
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
 
 
-def runCV(clf, distrib, X_train, y_train, scoring, verbose=1):
+def run_grid_search(clf_model, param_dist, x, y, scoring_metric, verbose=1):
     print('-' * 20)
+
     print('GridSearchCV start')
     print('-' * 20)
-    clf = GridSearchCV(clf_model, distrib, scoring=scoring_CV, verbose=2)
-    search = clf.fit(X_train, y_train)
+
+    print('Parameter set: \n {}'.format(param_dist))
+    print('-' * 20)
+
+    print('GridSearchCV is running...')
+    print('-' * 20)
+    clf = GridSearchCV(clf_model, param_dist, scoring=scoring_metric, verbose=verbose)
+    search = clf.fit(x, y)
+
     print('-' * 20)
     print('GridSearchCV completed')
+
     print('-' * 20)
+
     return search.best_params_
