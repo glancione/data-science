@@ -86,6 +86,32 @@ def analyze_column(df, column_name):
 
     return analysis
 
+def preprocess_data(df, drop_dupl=False, drop_nas=False):
+
+    if drop_dupl:
+        print("-" * 20)
+        print("Drop Duplicates ENABLED")
+        nrows_before_dd = df.shape[0]
+        df = df.drop_duplicates(subset=None, keep="first", ignore_index=False)
+        df = df.reset_index(drop=True)
+        nrows_after_dd = df.shape[0]
+        print(f"Duplicated row(s) removed: {nrows_before_dd - nrows_after_dd}")
+        print(f"Dataset row(s) after duplicate cleaning: {df.shape[0]}")
+        print("Drop Duplicates Finished")
+        print("-" * 20)
+
+    if drop_nas:
+        print("-" * 20)
+        print("Drop NA's ENABLED")
+        nrows_before_nac = df.shape[0]
+        df = df.dropna(axis=0, how="all")
+        nrows_after_nac = df.shape[0]
+        print(f"NA row(s) removed: {nrows_before_nac - nrows_after_nac}")
+        print(f"Dataset row(s) after NA cleaning: {df.shape[0]}")
+        print("Drop NA's Finished")
+        print("-" * 20)
+        
+    return df
 
 def handle_missing_values(df, strategy_='drop', fill_val=0, impute_strategy='most_frequent'):
     if strategy_ == 'drop':
