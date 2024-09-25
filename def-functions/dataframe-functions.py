@@ -244,3 +244,18 @@ def unroll_vector_column(df, column_name, drop_old_column=False):
             print(e)
         print('-'*20)
     return df
+
+
+def log_stats_df(df, df_label=None):
+    print("-" * 20)
+    if df_label:
+        logger.info("Log Stats dataframe {}".format(df_label))
+    print("Check NA: \n{}".format(df.isna().sum()))
+    print(
+        "Check duplicates: \n{} rows are duplicated".format(
+            df.shape[0] - df.drop_duplicates(subset=None, keep="first", ignore_index=False).shape[0]
+        )
+    )
+    print("dataframe has %s row(s)", str(df.shape[0]))
+    print("-" * 20)
+    
