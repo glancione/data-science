@@ -13,7 +13,9 @@ import os
 def subsample_set(n, df):
     n_subsampling = min(n, df.shape[0])
     print("Subsampling Data ENABLED!")
+    print(f"Dataset row(s) before subsampling: {df.shape[0]}")
     df = df[0:n_subsampling]
+    print(f"Dataset row(s) after subsampling:: {df.shape[0]}")
     return df
     
 
@@ -225,7 +227,9 @@ def preprocess_suggestion(column):
     return suggestion_
 
 
-def unroll_vector_column(df, column_name, drop_old_column=False):
+def unroll_vector_column(df, column_name, drop_orig_column=False):
+    # this function is useful for unrolling vectors obtained with w2v algorithms
+    # i.e. [x1,x2,x3,x4,...,x20] -> x1 | x2 | x3 | x4 | ... | x20
     print('-'*20)
     print('Unrolling {} column'.format(column_name))
     numpy_data = np.array(df[column_name])
@@ -235,8 +239,8 @@ def unroll_vector_column(df, column_name, drop_old_column=False):
     print('Column {} correctly unrolled'.format(column_name))
     print('Unrolled vector sample:\n {}'.format(df_out.sample(5)))
     print('-'*20)
-    if drop_old_column:
-        print('Drop Old Column ENABLED')
+    if drop_orig_column:
+        print('Drop original column {} ENABLED'.format(column_name))
         try:
             df = df.drop(column_name, axis=1)
             print('{} correctly dropped!'.format(column_name))
@@ -249,7 +253,7 @@ def unroll_vector_column(df, column_name, drop_old_column=False):
 def log_stats_df(df, df_label=None):
     print("-" * 20)
     if df_label:
-        logger.info("Log Stats dataframe {}".format(df_label))
+        print("Log Stats dataframe {}".format(df_label))
     print("Check NA: \n{}".format(df.isna().sum()))
     print(
         "Check duplicates: \n{} rows are duplicated".format(
