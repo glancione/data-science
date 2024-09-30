@@ -11,11 +11,14 @@ import os
 
 
 def subsample_set(n, df):
-    n_subsampling = min(n, df.shape[0])
-    print("Subsampling Data ENABLED!")
-    print(f"Dataset row(s) before subsampling: {df.shape[0]}")
-    df = df[0:n_subsampling]
-    print(f"Dataset row(s) after subsampling:: {df.shape[0]}")
+    if isinstance(n, int):
+        n_subsampling = min(n, df.shape[0])
+        print("Subsampling Data ENABLED!")
+        print(f"Dataset row(s) before subsampling: {df.shape[0]}")
+        df = df[0:n_subsampling]
+        print(f"Dataset row(s) after subsampling:: {df.shape[0]}")
+    else:
+        print("Subsampling Data DISABLED!")
     return df
     
 
