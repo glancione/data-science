@@ -109,18 +109,17 @@ def preds_and_probs(model, data, top_k=3):
 def accuracy_wrt_col(x, y_real, y_pred, column_name):
     print("-" * 20)
     print("Computing specific accuracy score with respect to column {}".format(column_name))
+    accuracy_array = []
+    elements_array = []
     for e in set(x[column_name]):
         print("Selected subset with column value = {}".format(e))
         y_real_ = y_real[x[column_name] == e]
         y_pred_ = y_pred[x[column_name] == e]
-        acc_ = 0
         print("The subset has {} row(s)".format(len(y_real_)))
-        for j in range(len(y_real_)):
-            real = y_real_[j]
-            pred = y_pred_[j]
-            if real == pred:
-                acc_ = acc_ + 1
-        acc_ = acc_ / len(y_real_)
-
+        acc_ = accuracy_score(y_real_, y_pred_)
         print("Accuracy Score: {}".format(acc_))
         print("-" * 20)
+        accuracy_array.append(acc_)
+        elements_array.append(e)
+    return accuracy_array, elements_array
+    
