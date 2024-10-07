@@ -92,7 +92,6 @@ def topK_accuracy(model, X, y, k=3):
     return acc_topk
 
 
-
 def preds_and_probs(model, data, top_k=3):
     # it works for random forest classifier
     guesses = model.predict_proba(df_in)
@@ -105,3 +104,23 @@ def preds_and_probs(model, data, top_k=3):
     print(f"predictions list {y_pred_list}")
     print(f"predicted probabilities list {y_proba_list}")
     return y_pred_list, y_proba_list
+
+
+def accuracy_wrt_col(x, y_real, y_pred, column_name):
+    print("-" * 20)
+    print("Computing specific accuracy score with respect to column {}".format(column_name))
+    for e in set(x[column_name]):
+        print("Selected subset with column value = {}".format(e))
+        y_real_ = y_real[x[column_name] == e]
+        y_pred_ = y_pred[x[column_name] == e]
+        acc_ = 0
+        print("The subset has {} row(s)".format(len(y_real_)))
+        for j in range(len(y_real_)):
+            real = y_real_[j]
+            pred = y_pred_[j]
+            if real == pred:
+                acc_ = acc_ + 1
+        acc_ = acc_ / len(y_real_)
+
+        print("Accuracy Score: {}".format(acc_))
+        print("-" * 20)
