@@ -2,73 +2,139 @@
 #### Dataframe Functions ###############
 ########################################
 
-import pandas as pd
-import numpy as np
-from scipy import stats
-from nltk.corpus import stopwords
-from sklearn.impute import SimpleImputer
+import logging
 import os
+from typing import Dict, List, Tuple
+
+import numpy as np
+import pandas as pd
+from nltk.corpus import stopwords
+from scipy import stats
+from sklearn.impute import SimpleImputer
+
+logger = logging.getLogger(__name__)
 
 
-def subsample_set(n, df):
+def calculate_correlation(df: pd.DataFrame, column1: str, column2: str) -> float:
+    return df[column1].corr(df[column2])
+
+
+def encode_categorical_features(df: pd.DataFrame, columns: List) -> pd.DataFrame:
+    return pd.get_dummies(df, columns=columns)
+
+
+def describe_numerical_columns(df: pd.DataFrame, columns: List) -> pd.DataFrame:
+    return df[columns].describe()
+
+
+def subsample_set(n, df: pd.DataFrame) -> pd.DataFrame:
     if isinstance(n, int):
+        logger.info("-" * 20)
+        logger.info("Subsampling Data ENABLED!")
+        logger.info("New dataset number of row(s) = {}".format(n))
         n_subsampling = min(n, df.shape[0])
-        print("Subsampling Data ENABLED!")
-        print(f"Dataset row(s) before subsampling: {df.shape[0]}")
         df = df[0:n_subsampling]
-        print(f"Dataset row(s) after subsampling:: {df.shape[0]}")
     else:
-        print("Subsampling Data DISABLED!")
+        logger.info("Subsampling Data DISABLED!")
     return df
-    
 
-def get_train_test_val_sets(train_path, test_path, val_path, n_subsampling=None):
-    print("Loading Train data...")
-    X_train = pd.read_csv(os.path.join(train_path, "X_train.csv"), sep=";")
-    y_train = pd.read_csv(os.path.join(train_path, "y_train.csv"), sep=";")
 
-    if n_subsampling:
-        X_train = subsample_set(n_subsampling, X_train)
-        y_train = subsample_set(n_subsampling, y_train)
+def log_stats_df(df: pd.DataFrame, df_label=None) -> None:
+    logger.info("-" * 20)
 
-    print("Correctly loaded Train data!")
-    print("Train data Sample: \n {}".format(X_train.sample(5)))
-    print("-" * 20)
+    if df_label:
+        logger.info("Log Stats dataframe {}".format(df_label))
 
-    print("Loading Test data...")
-    X_test = pd.read_csv(os.path.join(test_path, "X_test.csv"), sep=";")
-    y_test = pd.read_csv(os.path.join(test_path, "y_test.csv"), sep=";")
+    logger.info("Check NA: \n{}".format(df.isna().sum()))
 
-    if n_subsampling:
-        X_test = subsample_set(n_subsampling, X_test)
-        y_test = subsample_set(n_subsampling, y_test)
+    logger.info(
+        "Check duplicates: \n{} rows are duplicated".format(
+            df.shape[0] - df.drop_duplicates(subset=None, keep="first", ignore_index=False).shape[0]
+        )
+    )
 
-    print("Correctly loaded Test data!")
-    print("Test data Sample: \n {}".format(X_test.sample(5)))
-    print("-" * 20)
+    logger.info("dataframe has %s row(s)", str(df.shape[0]))
 
-    print("Loading Val data...")
-    X_val = pd.read_csv(os.path.join(val_path, "X_val.csv"), sep=";")
-    y_val = pd.read_csv(os.path.join(val_path, "y_val.csv"), sep=";")
+    logger.info("-" * 20)
 
-    if n_subsampling:
-        X_val = subsample_set(n_subsampling, X_val)
-        y_val = subsample_set(n_subsampling, y_val)
 
-    print("Correctly loaded Val data!")
-    print("Val data Sample: \n {}".format(X_val.sample(5)))
-    print("-" * 20)
+def get_train_test_val_sets(
+    train_path: str, test_path: str, val_path: str, num_samples=None
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
-    print("-" * 20)
-    print("Train set has %s rows", str(X_train.shape[0]))
-    print("Test set has %s rows", str(X_test.shape[0]))
-    print("Validation set has %s rows", str(X_val.shape[0]))
-    print("-" * 20)
+    """
+    Load Train, Test and Validation data
+    """
+
+    # Train Data
+    try:
+        logger.info("-" * 20)
+        logger.info("Loading Train data...")
+
+        X_train = pd.read_csv(os.path.join(train_path, "X_train.csv"), sep=";")
+        y_train = pd.read_csv(os.path.join(train_path, "y_train.csv"), sep=";")
+
+        X_train = subsample_set(n=num_samples, df=X_train)
+        y_train = subsample_set(n=num_samples, df=y_train)
+
+        logger.info("Correctly loaded Train data!")
+        logger.info("Train set has %s rows", str(X_train.shape[0]))
+        logger.info("Train data Sample: \n {}".format(X_train.sample(5)))
+    except Exception as e:
+        logger.info("Error loading Train data: %s", e)
+        logger.info("Train data not found!")
+
+        X_train = None
+        y_train = None
+
+    # Test Data
+    try:
+        logger.info("-" * 20)
+        logger.info("Loading Test data...")
+
+        X_test = pd.read_csv(os.path.join(test_path, "X_test.csv"), sep=";")
+        y_test = pd.read_csv(os.path.join(test_path, "y_test.csv"), sep=";")
+
+        X_test = subsample_set(n=num_samples, df=X_test)
+        y_test = subsample_set(n=num_samples, df=y_test)
+
+        logger.info("Correctly loaded Test data!")
+        logger.info("Test set has %s rows", str(X_test.shape[0]))
+        logger.info("Test data Sample: \n {}".format(X_test.sample(5)))
+    except Exception as e:
+        logger.info("Error loading Test data: %s", e)
+        logger.info("Test data not found!")
+
+        X_test = None
+        y_test = None
+
+    # Val Data
+    try:
+        logger.info("-" * 20)
+        logger.info("Loading Val data...")
+
+        X_val = pd.read_csv(os.path.join(val_path, "X_val.csv"), sep=";")
+        y_val = pd.read_csv(os.path.join(val_path, "y_val.csv"), sep=";")
+
+        X_val = subsample_set(n=num_samples, df=X_val)
+        y_val = subsample_set(n=num_samples, df=y_val)
+
+        logger.info("Correctly loaded Val data!")
+        logger.info("Validation set has %s rows", str(X_val.shape[0]))
+        logger.info("Val data Sample: \n {}".format(X_val.sample(5)))
+    except Exception as e:
+        logger.info("Error loading Val data: %s", e)
+        logger.info("Val data not found!")
+
+        X_val = None
+        y_val = None
+
+    logger.info("-" * 20)
 
     return X_train, y_train, X_test, y_test, X_val, y_val
 
 
-def analyze_column(df, column_name):
+def analyze_column(df: pd.DataFrame, column_name: str) -> Dict:
     column_data = df[column_name]
 
     analysis = {
@@ -78,7 +144,7 @@ def analyze_column(df, column_name):
         "missing_values": column_data.isnull().sum(),
         "unique_values": column_data.nunique(),
         "top_values": column_data.value_counts().head(5),
-        "summary_statistics": column_data.describe()
+        "summary_statistics": column_data.describe(),
     }
 
     if np.issubdtype(column_data.dtype, np.number):
@@ -91,86 +157,22 @@ def analyze_column(df, column_name):
 
     return analysis
 
-def preprocess_data(df, drop_dupl=False, drop_nas=False):
 
-    if drop_dupl:
-        print("-" * 20)
-        print("Drop Duplicates ENABLED")
-        nrows_before_dd = df.shape[0]
-        df = df.drop_duplicates(subset=None, keep="first", ignore_index=False)
-        df = df.reset_index(drop=True)
-        nrows_after_dd = df.shape[0]
-        print(f"Duplicated row(s) removed: {nrows_before_dd - nrows_after_dd}")
-        print(f"Dataset row(s) after duplicate cleaning: {df.shape[0]}")
-        print("Drop Duplicates Finished")
-        print("-" * 20)
-
-    if drop_nas:
-        print("-" * 20)
-        print("Drop NA's ENABLED")
-        nrows_before_nac = df.shape[0]
-        df = df.dropna(axis=0, how="all")
-        nrows_after_nac = df.shape[0]
-        print(f"NA row(s) removed: {nrows_before_nac - nrows_after_nac}")
-        print(f"Dataset row(s) after NA cleaning: {df.shape[0]}")
-        print("Drop NA's Finished")
-        print("-" * 20)
-        
-    return df
-
-def handle_missing_values(df, strategy_='drop', fill_val=0, impute_strategy='most_frequent'):
-    if strategy_ == 'drop':
-        return df.dropna()
-    elif strategy_ == 'fill':
-        return df.fillna(fill_val)
-    elif strategy_ == 'impute':
-        imp = SimpleImputer(strategy=impute_strategy)
-        return imp.fit_transform(df)
-    else:
-        raise ValueError("Invalid strategy for handling missing values.")
-
-
-def impute_missing_values(df, column, strategy='mean'):
-    if strategy == 'mean':
+def impute_missing_values(df: pd.DataFrame, column: str, strategy="mean") -> pd.DataFrame:
+    if strategy == "mean":
         return df[column].fillna(df[column].mean(), inplace=True)
-    elif strategy == 'median':
+    elif strategy == "median":
         return df[column].fillna(df[column].median(), inplace=True)
-    elif strategy == 'mode':
+    elif strategy == "mode":
         return df[column].fillna(df[column].mode()[0], inplace=True)
     else:
         raise ValueError("Invalid strategy for imputation.")
 
 
-def calculate_correlation(df, column1, column2):
-    return df[column1].corr(df[column2])
-
-
-def handle_outliers(df, columns, method='zscore', threshold=3):
-    if method == 'zscore':
-        for col in columns:
-            z_scores = stats.zscore(df[col])
-            df = df[abs(z_scores) < threshold]
-    elif method == 'iqr':  # Options are 'zscore', 'iqr'.
-        # TO DO Implement IQR-based outlier detection
-        pass
-    else:
-        raise ValueError("Invalid method for outlier detection.")
-    return df
-
-
-
-def encode_categorical_features(df, columns):
-    return pd.get_dummies(df, columns=columns)
-
-
-def describe_numerical_columns(df, columns):
-    return df[columns].describe()
-
-
-def preprocess_suggestion(column):
+def preprocess_suggestion(column: pd.Series) -> str:
     suggestion_ = ""
     data_type_ = str(column.dtype)
-    if data_type_.startswith('int') or data_type_.startswith('float'):
+    if data_type_.startswith("int") or data_type_.startswith("float"):
         if column.isnull().sum() > 0:
             percent_missing = column.isnull().sum() * 100 / len(column)
             suggestion_ += str(percent_missing) + " % of values are outliers.\n"
@@ -190,7 +192,7 @@ def preprocess_suggestion(column):
         if (column.max() - column.min()) > 100:
             suggestion_ += "Large scale difference. Consider normalization or standardization.\n"
 
-    elif data_type_ == 'object':
+    elif data_type_ == "object":
         if column.isnull().sum() > 0:
             suggestion_ += "Fill missing values with: mode or 'unknown' category if categorical.\n"
             suggestion_ += "Fill missing values with: empty string or 'missing' value (if text).\n"
@@ -201,11 +203,8 @@ def preprocess_suggestion(column):
         if not pd.api.types.is_datetime64_dtype(column):
             suggestion_ += "Check for consistent formatting in text data.\n"
 
-        if column.str.contains(r'[^a-zA-Z\s]').any():
+        if column.str.contains(r"[^a-zA-Z\s]").any():
             suggestion_ += "Consider removing noise (numbers, special characters).\n"
-
-        if column.apply(lambda x: len(set(x.split()) & set(stopwords.words('english'))) > 0).any():
-            suggestion_ += "Consider removing stop words.\n"
 
         if column.str.len().mean() > 100:
             suggestion_ += "Text length is relatively long. Consider text summarization or truncation.\n"
@@ -213,7 +212,7 @@ def preprocess_suggestion(column):
         if column.apply(lambda x: len(set(x.split())) / len(x.split())).mean() < 0.5:
             suggestion_ += "Text contains repeated words. Consider deduplication or stemming.\n"
 
-    elif data_type_ == 'datetime64[ns]':
+    elif data_type_ == "datetime64[ns]":
         if column.isnull().sum() > 0:
             suggestion_ += "Fill missing values with appropriate date or interpolation.\n"
 
@@ -230,39 +229,49 @@ def preprocess_suggestion(column):
     return suggestion_
 
 
-def unroll_vector_column(df, column_name, drop_orig_column=False):
-    # this function is useful for unrolling vectors obtained with w2v algorithms
-    # i.e. [x1,x2,x3,x4,...,x20] -> x1 | x2 | x3 | x4 | ... | x20
-    print('-'*20)
-    print('Unrolling {} column'.format(column_name))
-    numpy_data = np.array(df[column_name])
-    df_out = pd.DataFrame(data=numpy_data)
-    df_out.columns = [f'vector{i}' for i in range(0,len(df_out.T))] 
-    df= pd.concat([df, df_out], axis = 1)
-    print('Column {} correctly unrolled'.format(column_name))
-    print('Unrolled vector sample:\n {}'.format(df_out.sample(5)))
-    print('-'*20)
-    if drop_orig_column:
-        print('Drop original column {} ENABLED'.format(column_name))
-        try:
-            df = df.drop(column_name, axis=1)
-            print('{} correctly dropped!'.format(column_name))
-        except Exception as e:
-            print(e)
-        print('-'*20)
+def handle_missing_values(df, strategy_="drop", fill_val=0, impute_strategy="most_frequent"):
+    if strategy_ == "drop":
+        return df.dropna()
+    elif strategy_ == "fill":
+        return df.fillna(fill_val)
+    elif strategy_ == "impute":
+        imp = SimpleImputer(strategy=impute_strategy)
+        return imp.fit_transform(df)
+    else:
+        raise ValueError("Invalid strategy for handling missing values.")
+
+
+def handle_outliers(df, columns, method="zscore", threshold=3):
+    if method == "zscore":
+        for col in columns:
+            z_scores = stats.zscore(df[col])
+            df = df[abs(z_scores) < threshold]
+    elif method == "iqr":  # Options are 'zscore', 'iqr'.
+        # TO DO Implement IQR-based outlier detection
+        pass
+    else:
+        raise ValueError("Invalid method for outlier detection.")
     return df
 
 
-def log_stats_df(df, df_label=None):
-    print("-" * 20)
-    if df_label:
-        print("Log Stats dataframe {}".format(df_label))
-    print("Check NA: \n{}".format(df.isna().sum()))
-    print(
-        "Check duplicates: \n{} rows are duplicated".format(
-            df.shape[0] - df.drop_duplicates(subset=None, keep="first", ignore_index=False).shape[0]
-        )
-    )
-    print("dataframe has %s row(s)", str(df.shape[0]))
-    print("-" * 20)
-    
+def unroll_vector_column(df, column_name, drop_orig_column=False):
+    # this function is useful for unrolling vectors obtained with w2v algorithms
+    # i.e. [x1,x2,x3,x4,...,x20] -> x1 | x2 | x3 | x4 | ... | x20
+    logger.info("-" * 20)
+    logger.info("Unrolling {} column".format(column_name))
+    numpy_data = np.array(df[column_name])
+    df_out = pd.DataFrame(data=numpy_data)
+    df_out.columns = [f"vector{i}" for i in range(0, len(df_out.T))]
+    df = pd.concat([df, df_out], axis=1)
+    logger.info("Column {} correctly unrolled".format(column_name))
+    logger.info("Unrolled vector sample:\n {}".format(df_out.sample(5)))
+    logger.info("-" * 20)
+    if drop_orig_column:
+        logger.info("Drop original column {} ENABLED".format(column_name))
+        try:
+            df = df.drop(column_name, axis=1)
+            logger.info("{} correctly dropped!".format(column_name))
+        except Exception as e:
+            logger.info(e)
+        logger.info("-" * 20)
+    return df
